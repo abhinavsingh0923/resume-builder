@@ -1,155 +1,126 @@
-# 🚀 AI Resume Builder
+# Intelligent Resume Builder
 
-<div align="center">
+An advanced, containerized Resume Builder application powered by AI. This project includes a complete DevOps lifecycle setup with Kubernetes, Jenkins CI/CD, and full observability.
 
-[![Python](https://img.shields.io/badge/Python-3.12%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Powered-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Built with uv](https://img.shields.io/badge/Built%20with-uv-purple?style=for-the-badge)](https://github.com/astral-sh/uv)
+## Table of Contents
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Local Development](#local-development)
+- [Kubernetes Deployment](#kubernetes-deployment)
+- [Jenkins CI/CD Pipeline](#jenkins-cicd-pipeline)
+- [Monitoring Setup](#monitoring-setup)
+- [Test & Security](#test--security)
 
-**Build your dream resume with the power of Artificial Intelligence.**
+## Features
+- **AI-Powered**: Uses LangChain and Google GenAI for resume generation.
+- **Streamlit UI**: Interactive and responsive User Interface.
+- **Containerized**: Docker support for easy deployment.
+- **Auto-Scaling**: Kubernetes Horizontal Pod Autoscaler enabled.
+- **CI/CD**: Fully automated Jenkins pipeline with security scans and GitOps.
+- **Observability**: Prometheus, Grafana, and Loki stack integration.
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Installation](#-installation) • [Docker](#-docker-setup) • [Usage](#-usage-guide)
+## Project Structure
+```
+.
+├── app/                  # Application source code
+├── k8s/                  # Kubernetes Manifests
+│   ├── deployment.yaml   # App Deployment (Replicas, Resources)
+│   ├── service.yaml      # Service (LoadBalancer)
+│   ├── hpa.yaml          # Horizontal Pod Autoscaler
+│   └── ingress.yaml      # Ingress rules
+├── monitoring/
+│   └── setup.sh          # Helm installation script for monitoring
+├── test/
+│   └── test_basic.py     # Unit tests
+├── Jenkinsfile           # CI/CD Pipeline definition
+├── Dockerfile            # Container definition
+└── README.md             # This file
+```
 
-</div>
+## Prerequisites
+- **Docker** & **Kubernetes** Cluster (EC2/Minikube/EKS).
+- **Helm** (for monitoring charts).
+- **Jenkins** server with Plugins:
+    - Docker Pipeline
+    - SonarQube Scanner
+    - OWASP Dependency Check
+    - Git / GitHub
+- **Python 3.12+** & **UV** (for local run).
 
----
-
-## 📖 Introduction
-
-**AI Resume Builder** is a next-generation resume creation tool that leverages **Google's Gemini AI** to act as your personal career coach. Unlike static templates, this intelligent application effectively *interviews* you, extracts your key achievements, and automatically formats them into a professional, ATS-optimized resume.
-
-Stop struggling with writer's block. Let our agents guide you through building a CV that stands out.
-
-## 🌟 Features
-
-### 🧠 Intelligent AI Agents
-- **Reviewer Agent**: Analyzes your target job description and asks probing questions to gather relevant experience.
-- **Refinement Agent**: Instantly transforms basic answers into powerful, STAR-method (Situation, Task, Action, Result) bullet points.
-- **ATS Scanner**: Real-time scoring of your resume against the job requirements with actionable feedback.
-
-### ⚡ Modern Experience
-- **Interactive Chat Interface**: Build your resume through a natural conversation.
-- **Real-time Preview**: See your resume evolve as you answer questions.
-- **Auth System**: Secure login/signup to save multiple versions of your resume.
-
-### 📄 Professional Output
-- **One-Click PDF**: Generate beautifully formatted, standard-compliant PDFs ready for application.
-- **Clean Design**: Minimalist and professional layout favored by recruiters.
-
-## �️ Tech Stack
-
-This project is built with a modern, robust stack designed for performance and scalability.
-
-| Component | Technology | Description |
-|-----------|------------|-------------|
-| **Frontend** | ![Streamlit](https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) | Interactive web interface |
-| **Orchestration** | ![LangChain](https://img.shields.io/badge/-LangGraph-1C3C3C?style=flat-square) | Agent workflow orchestration |
-| **LLM** | ![Gemini](https://img.shields.io/badge/-Google%20Gemini-4285F4?style=flat-square&logo=google&logoColor=white) | The brains behind the operation |
-| **Database** | ![MongoDB](https://img.shields.io/badge/-MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) | User and session data storage |
-| **Package Manager** | ![uv](https://img.shields.io/badge/-uv-purple?style=flat-square) | Blazing fast Python package installer |
-| **Containerization** | ![Docker](https://img.shields.io/badge/-Docker-2496ED?style=flat-square&logo=docker&logoColor=white) | Easy deployment |
-
-## 🚀 Installation
-
-### Prerequisites
-- **Python 3.12+**
-- **MongoDB** (Local or Atlas URL)
-- **Google Cloud API Key** (Gemini)
-
-### Local Setup (The Fast Way with `uv`)
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/ai-resume-builder.git
-   cd ai-resume-builder
-   ```
-
-2. **Install `uv` (if not installed)**
+## Local Development
+1. **Install dependencies**:
    ```bash
    pip install uv
-   ```
-
-3. **Sync Dependencies**
-   ```bash
    uv sync
    ```
-
-4. **Configure Environment**
-   Create a `.env` file in the root directory:
-   ```env
-   GOOGLE_API_KEY=your_gemini_api_key
-   MONGO_URI=mongodb://localhost:27017/
-   DB_NAME=resume_builder
-   ```
-
-5. **Run the App**
+2. **Run Application**:
    ```bash
    uv run streamlit run app/main.py
    ```
-   Visit `http://localhost:8501` to start building!
 
-## 🐳 Docker Setup
-
-We provide a fully dockerized environment for zero-hassle setup.
-
-1. **Ensure Docker is running**.
-
-2. **Configure `.env`** as shown above.
-
-3. **Run with Docker Compose**
+## Kubernetes Deployment
+To manually deploy to your cluster:
+1. **Apply Namespace**:
    ```bash
-   docker-compose up -d --build
+   kubectl apply -f k8s/namespace.yaml
+   ```
+2. **Create Secrets**:
+   Edit `k8s/secrets.yaml` with your actual API keys and DB URI, then apply:
+   ```bash
+   kubectl apply -f k8s/secrets.yaml
+   ```
+   *Note: Do not commit the modified secrets.yaml to public git!*
+3. **Apply Manifests**:
+   ```bash
+   kubectl apply -f k8s/deployment.yaml
+   kubectl apply -f k8s/service.yaml
+   kubectl apply -f k8s/hpa.yaml
+   kubectl apply -f k8s/ingress.yaml
+   ```
+   ```bash
+   kubectl get pods
+   ```
+3. **Access Service**:
+   Check the external IP of the service:
+   ```bash
+   kubectl get svc resume-builder-svc
    ```
 
-4. **Access the App**
-   Open your browser at `http://localhost:8501`.
+## Jenkins CI/CD Pipeline
+The included `Jenkinsfile` automates the following:
+1. **Clone**: Pulls code from GitHub.
+2. **Test**: Runs `pytest`.
+3. **Scan**:
+    - **SonarQube**: Static code analysis.
+    - **Trivy**: Container image vulnerability scan.
+    - **OWASP**: Dependency check.
+4. **Build & Push**: Builds Docker image and checks into DockerHub.
+5. **Tag**: Semantic version tagging on Git.
+6. **Deploy**: Updates `k8s/deployment.yaml` with the new image tag and commits back to Git. ArgoCD (if configured) will pick up this change.
 
-   *Note: The MongoDB service is automatically set up on port `27017`.*
+**Setup Steps in Jenkins**:
+1. Create a "Pipeline" job.
+2. Set "Definition" to "Pipeline script from SCM".
+3. Add Credentials:
+    - `docker-hub-creds` (Username/Password)
+    - `sonar-token` (Secret Text)
+    - `github-ssh-key` (SSH Private Key for GitOps push)
 
-## 📂 Project Structure
+## Monitoring Setup
+We use Helm to deploy Prometheus, Grafana, and Loki.
 
-```text
-.
-├── app/
-│   ├── agents/          # AI Agent definitions & Graphs
-│   ├── core/            # Database & Auth logic
-│   ├── pages/           # Streamlit sub-pages (Builder UI)
-│   ├── services/        # PDF Generation & external services
-│   ├── ui/              # Reusable UI components
-│   └── main.py          # Entry point
-├── .dockerignore        # Docker build exclusions
-├── Dockerfile           # App container definition
-├── docker-compose.yaml  # Orchestration service definition
-├── pyproject.toml       # Dependencies (uv/standard)
-└── uv.lock              # Lockfile
-```
+1. **Run Setup Script**:
+   ```bash
+   chmod +x monitoring/setup.sh
+   ./monitoring/setup.sh
+   ```
+2. **Access Grafana**:
+   - Port-forward: `kubectl port-forward svc/prometheus-stack-grafana 3000:80 -n monitoring`
+   - Open `http://localhost:3000` (User: `admin`).
+   - Get Password: `kubectl get secret --namespace monitoring prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode`
 
-## 📝 Usage Guide
-
-1. **Sign Up**: Create an account to save your progress.
-2. **Dashboard**: View past sessions or start a new one.
-3. **Start New**: Paste the **Job Description** you are applying for.
-4. **Chat**: Answer the AI's questions about your experience. Watch as it refines your answers.
-5. **Review**: Check the Real-time ATS score in the sidebar.
-6. **Download**: Once satisfied, click **Download PDF**.
-
-## 🤝 Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-<div align="center">
-Made with ❤️ by the AI Resume Builder Team
-</div>
+## Test & Security
+- **Unit Tests**: Run `uv run pytest`.
+- **SonarQube**: Accessible at your SonarQube server URL.
+- **Trivy & OWASP**: Reports generated during the Jenkins build.

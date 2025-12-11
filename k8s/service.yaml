@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: resume-builder-svc
+  namespace: resume-builder-ns
+  labels:
+    app: resume-builder
+spec:
+  selector:
+    app: resume-builder
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8501
+  type: LoadBalancer # Change to NodePort or ClusterIP if using Ingress
