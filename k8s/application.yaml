@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: resume-builder
+  namespace: argocd
+  annotations:
+    # --- Image Updater Configuration ---
+    # 1. Which image to track? (alias=image_name)
+    argocd-image-updater.argoproj.io/image-list: resume-builder=abhinavsingh0923/resume-builder
+    
+    # 2. Update strategy: 'latest' (most recent tag) or semver
+    argocd-image-updater.argoproj.io/resume-builder.update-strategy: latest
+    
+    # 3. Allow patch/minor/major updates? (optional, useful for semver)
+    argocd-image-updater.argoproj.io/resume-builder.allow-tags: regexp:^v[0-9]+\.[0-9]+\.[0-9]+$
+    
+    # 4. Write back method: 'git' commits changes back to repo, 'argocd' only updates in-cluster
+    # We recommend 'git' for true GitOps, but it requires repo credentials in ArgoCD.
+    # If 'git' is too complex to set up right now, changing this to 'argocd' works instantly but changes aren't persistent in git.
+    argocd-image-updater.argoproj.io/write-back-method: git
+    
+    # 5. Git Commit Message 
+    argocd-image-updater.argoproj.io/git-commit-message: "chore: update resume-builder image to {{.image.tag}} [skip ci]"
+
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/abhinavsingh0923/resume-builder.git
+    targetRevision: main
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: resume-builder-ns
+  
+  # Auto-Sync Policy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

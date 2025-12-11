@@ -87,25 +87,25 @@ To manually deploy to your cluster:
    kubectl get svc resume-builder-svc
    ```
 
-## Jenkins CI/CD Pipeline
-The included `Jenkinsfile` automates the following:
-1. **Clone**: Pulls code from GitHub.
-2. **Test**: Runs `pytest`.
-3. **Scan**:
-    - **SonarQube**: Static code analysis.
-    - **Trivy**: Container image vulnerability scan.
-    - **OWASP**: Dependency check.
-4. **Build & Push**: Builds Docker image and checks into DockerHub.
-5. **Tag**: Semantic version tagging on Git.
-6. **Deploy**: Updates `k8s/deployment.yaml` with the new image tag and commits back to Git. ArgoCD (if configured) will pick up this change.
+## Continuous Deployment (ArgoCD Image Updater)
+We use **ArgoCD Image Updater** to automatically update the application when a new Docker image is pushed by Jenkins.
 
-**Setup Steps in Jenkins**:
-1. Create a "Pipeline" job.
-2. Set "Definition" to "Pipeline script from SCM".
-3. Add Credentials:
-    - `docker-hub-creds` (Username/Password)
-    - `sonar-token` (Secret Text)
-    - `github-ssh-key` (SSH Private Key for GitOps push)
+### 1. Prerequisite
+Ensure ArgoCD and the ArgoCD Image Updater controller are installed in your cluster.
+
+### 2. Apply Application Manifest
+The `k8s/application.yaml` file contains the logic to track your Docker registry.
+```bash
+kubectl apply -f k8s/application.yaml
+```
+
+### 3. How it Works
+1. **Jenkins** pushes a new tag (e.g., `v1.0.5`).
+2. **Image Updater** detects the new tag in the registry.
+3. It **commits** the change back to GitHub (updating `k8s/deployment.yaml`) with `[skip ci]`.
+4. **ArgoCD** syncs the new manifest to the cluster.
+
+> **Note**: For `write-back-method: git` to work, ArgoCD must have write access (SSH or Token) to your GitHub repository.
 
 ## Monitoring Setup
 We use Helm to deploy Prometheus, Grafana, and Loki.
